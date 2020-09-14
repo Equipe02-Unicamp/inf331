@@ -1,7 +1,13 @@
 # Projeto `<Título>`
 
-# Equipe
-* `<nome completo>`
+# Equipe 2
+* Caroline Augusti
+* Felipe Emygdio de Salles
+* Gustavo Porto Guedes
+* Luan Neves Silva
+* Paulo Mellin Gimenes
+* Thiago Natanael
+
 
 # Nível 1
 
