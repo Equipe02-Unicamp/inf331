@@ -330,7 +330,7 @@ Interface que contém as informações de frete calculado para o item.
 ```
 
 # Componente de Acompanhamento
-![Componente](images/image9.png)
+![Componente](images/image9.png)<br />
 
 Este componente funciona de forma síncrona e é responsável por fornecer dados sobre o estado da entrega, como interface requerida necessita de um IRastreio e no final provê uma interface de IPedido. Ele é acionado após a confirmação de pagamento do pedido, provendo a possibilidade de acompanhamento do andamento da entrega. 
 
@@ -364,7 +364,7 @@ Este componente funciona de forma síncrona e é responsável por fornecer dados
 ```
 
 # Componente de Chat
-![Componente](images/image13.png)
+![Componente](images/image13.png)<br />
 Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de comunicação entre o consumidor e o fornecedor, como interface requerida necessita de um 
 
 ## Interfaces de Chat
@@ -392,7 +392,7 @@ Interface polimórfica que pode ser referente há um pedido, rastreio ou produto
 ```
 
 # Componente Cadastro de Produto
-![Componente](images/image12.png)
+![Componente](images/image12.png)<br />
 Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de cadastro de produto por fornecedores, como interfaces tanto requerida quanto provida necessita de um IProduto.
 
 ## Interfaces de Cadastro de Produto
@@ -421,14 +421,14 @@ Interface responsável por receber e emitir mensagens referente a característic
 ```
   
 # Componente Filtro de Produto
-![Componente](images/image10.png)
+![Componente](images/image10.png)<br />
 
 Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de filtragem de lista produtos disponíveis, como interfaces requerida IFiltroProduto responsável por fornecer os parâmetros necessários para o filtro provendo a interface Produto[] responsável por fornecer uma lista de produtos.
 
 # Componente Leilão
 Este componente funciona de maneira assíncrona ao restante do sistema. Como interface requerida, o mesmo necessita apenas de um IFiltroProduto e, ao final de seu processamento, provê uma interface do tipo Produto[]. Ele é utilizado constantemente durante a utilização da feature de busca de produtos realizada pelo usuário. 
 Para atingir o funcionamento previsto, foi necessário realizar uma pequena composição de outros 3 componentes. Eles são: Leilão Invertido, Lojistas, e Rankeamento.
-![Componente](images/image11.png)
+![Componente](images/image11.png)<br />
 
 ## Interfaces de Leilão
 
@@ -438,7 +438,7 @@ Esta interface é utilizada como ponto de partida para que o componente Leilão 
 **Tópico:** leilao/produto/filtro
 Este tópico é assinado pelos componentes Leilão Invertido e Lojistas. 
 
-![Componente](images/image2.png)
+![Componente](images/image2.png)<br />
 
 |Atributo|Descrição|
 |:-:|:-|
