@@ -430,6 +430,18 @@ Esta interface é provida pelo componente ao final de seu processamento.Ela é u
 **Tópico:** leilao/produtos
 Este tópico é assinado pelos componentes Rankeamento e Lojista.
 
+**Tópico:** leilao/produtos/rankeados
+	Este tópico é assinado pelo componente Rankeamento. Neste tópico a interface que é utilizada para processamento das mensagens também é o Produto[], sendo diferenciado por conta de ter seus produtos ordenados de forma a especificar para o usuário os melhores produtos.
+
+|Atributo|Descrição|
+|:-:|:-|
+|codProduto|Identificador unico do produto|
+|nome|Nome do produto|
+|preco|Preco de venda do produto|
+|descricao|Descrição detalhada do produto|
+|categoria|Array de categorias do produto|
+|disponibilidade|Indicador se o produto está disponível para compra|
+
 #### Json Exemplo
 ```json
 {
@@ -447,6 +459,166 @@ Este tópico é assinado pelos componentes Rankeamento e Lojista.
 }
 ```
 
+# Componente Dashboard
+Componente responsável pela construção dos dashboards. Como interface requerida, é esperado a IUsuario e como interface provida a IRelatorio, representando os dados do usuário e os dados necessários para geração do dashboard, respectivamente.
+
+### IRelatorio
+Representa o relatório resultante do gerenciamento dos usuários.
+|Atributo|Descrição|
+|:-:|:-|
+|codRelatorio|Código único de identificação do relatório|
+|descRelatorio|Descrição do relatório|
+|dadosGrafico|Objeto contendo os dados necessários para composição do gráfico|
+
+#### Json Exemplo
+```json
+{
+   "codRelatorio": 1,
+   "descRelatorio": "Descrição do relatório",
+   "dadosGrafico": IGrafico()
+}
+```
+ 
+## Grafico Administrador
+ 
+Perfil de acesso Administrativo. 
+
+### IGraficoAdm *extende* IGrafico
+Representa o grafico da dashboard dos administradores.
+|Atributo|Descrição|
+|:-:|:-|
+|tipoGrafico|Tipo do gráfico a ser gerado|
+|title|Titulo do gráfico|
+|width|Largura do grafico|
+|height|Altura do grafico|
+|legend|Legenda do grafico|
+
+#### Json Exemplo
+```json
+{
+  "tipoGrafico": "bar",
+  "title": "Gráfico de barras",
+  "width": 600,
+  "height": 400,
+  "legend": ["bar1", "bar2"]
+}
+```
+
+## Grafico Cliente
+ 
+Perfil de acesso Cliente. 
+
+### IGraficoCli *extende* IGrafico
+Representa o grafico da dashboard dos usuários.
+|Atributo|Descrição|
+|:-:|:-|
+|tipoGrafico|Tipo do gráfico a ser gerado|
+|title|Titulo do gráfico|
+|pieHole|Tamanho do grafico|
+|color|Cor do segmento de dados|
+|legend|Legenda do grafico|
+
+#### Json Exemplo
+```json
+{
+  "tipoGrafico": "pie",
+  "title": "Gráfico de barras",
+  "pieHole": 0.5,
+  "color": "black",
+  "legend": ["pie1"]
+}
+```
+ 
+## Grafico Lojista
+
+Perfil de acesso do Lojista.
+ 
+### IGraficoLoj *extende* IGrafico
+Representa o grafico da dashboard dos lojistas.
+|Atributo|Descrição|
+|:-:|:-|
+|tipoGrafico|Tipo do gráfico a ser gerado|
+|title|Titulo do gráfico|
+|width|Largura do grafico|
+|height|Altura do grafico|
+|legend|Legenda do grafico|
+
+#### Json Exemplo
+```json
+{
+  "tipoGrafico": "column",
+  "title": "Gráfico de colunas",
+  "width": 600,
+  "height": 400,
+  "legend": ["column1"]
+}
+```
+
+# Sub-Componentes de Acesso
+## Componente Cadastro Usuário
+Este componente tem como função realizar o cadastramento de lojistas, administradores e clientes do Marketplace. Como interface requerida necessita de um 
+IUsuario e no final provê uma interface de IUsuario também. Se ao clicar em cadastrar, e o usuário já tiver cadastro, será redirecionado para o componente de Login, se não possuir o sistema irá direcioná-lo para o devido cadastramento no sistema.
+
+## Componente Login
+
+Esse componente tem como função efetuar o login de lojistas, administradores e clientes do Marketplace. Como interface requerida necessita de um IUsuario e no final provê uma interface de IUsuario também. Ele é acionado quando o usuário é direcionado para a página de autenticação do sistema.
+
+## Componente Perfil Acesso
+
+Este componente tem como função realizar o controle de acesso do usuário no sistema. Ele recebe uma interface IUsuario como entrada, e depois faz a validação do perfil de acesso do mesmo por meio da interface IPerfilAcesso.
+
+## Interfaces de Acesso
+
+### IUsuario
+Representa o usuário no sistema, contendo os dados comuns de qualquer usuário do mesmo, como: nome, senha, endereço, email, etc.
+
+|Atributo|Descrição|
+|:-:|:-|
+|perfil|Tipo de acesso que o usuário tem no sistema.|
+|codUsuario|Identificação única do usuário: CPF ou CNPJ.|
+|nome|Nome do usuário.|
+|senha|Senha criptografada do usuário para obter acesso ao sistema.|
+|endereco|Lista de endereços cadastrados pelo usuário.|
+|telefone|Telefone de contato do usuário.|
+|email|Email cadastrado do usuário no sistema.|
+|criado|Quando usuário foi cadastrado no sistema.|
+|atualizado|Última atualização no perfil de acesso do usuário|
+
+#### Json Exemplo
+```json
+{
+  "perfil": IPerfilAcesso(),
+  "cod_usuario": "123.456.789-10",
+  "nome": "João da Silva",
+  "senha": "*************",
+  "endereco": IEndereco(),
+  "telefone": "19 9 9999 9999",
+  "email": "joao.silva@email.com",
+  "criado": "2020-09-10",
+  "atualizado": "2020-09-17"
+}
+```
+
+### IPerfilAcesso
+Representa a especialização do usuário no sistema, podendo representar os seguintes tipos de perfil: cliente, administrador e lojista.
+
+|Atributo|Descrição|
+|:-:|:-|
+|tipo|Tipo de perfil de acesso: lojista, cliente ou administrador.|
+|pedidos|Lista de pedidos do lojista ou cliente.|
+|historico|Se tipo lojista: histórico de vendas e visualizações. Se lojista: histórico de compras e pesquisa.|
+|produtos|Se tipo lojista: produtos cadastrados pelo lojista no Marketplace.|
+
+#### Json Exemplo
+```json
+{
+  "tipo": "cliente",
+  "pedidos": IPedido[],
+  "historico": [],
+  "produtos": IProduto[]
+}
+
+```
 
 
 
