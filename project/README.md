@@ -787,6 +787,17 @@ Método | Objetivo
 
 # Multiplas Interfaces
 
-> Escreva um texto detalhando como seus componentes  podem ser preparados para que seja possível trocar de interface apenas trocando o componente View e mantendo o Model e Controller.
->
-> É recomendado a inserção de, pelo menos, um diagrama que deve ser descrito no texto. O formato do diagrama é livre e deve ilustrar a arquitetura proposta.
+Para ilustrar o processo de multiplas interfaces a equipe optou por diagramar o fluxo de utilização do componente de Checkout.
+Para realizar os processos de compra, a forma de comunicação da view com o controller foi feita toda de forma assíncrona, 
+através de comunicação via barramento. 
+Desta forma, a view não precisa conhecer todas as interfaces de comunicação requeridas pelo controller.
+Isto faz com que a camada de visualização não fique fortemente acoplada à camada de controller.
+Outro ponto importante a se considerar é que, no processo de funcionamento do componente (descrito acima)
+não existe interação da camada de visualização com a camada de dados. Desta forma existe apenas um fraco acoplamento
+entre View e controller e nenhum acoplamento entre View e Model.
+
+Tendo isto em mente, para realizar a troca de interface com o objetivo de evolução e/ou portabilidade
+é necessário apenas que a camada de visualização tenha conhecimento das interfaces de Pedido e de Itens.
+O restante do processo de validação é todo realizado através de comunicações via JSON:
+
+![Diagrama Fluxo](images/multiplas.png)
