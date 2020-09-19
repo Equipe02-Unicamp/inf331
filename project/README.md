@@ -15,6 +15,39 @@
 
 ![Diagrama no nível 1](images/Nivel_1_Diagrama_Detalhado.png)
 
+# Detalhamento da interação dos componentes
+
+O componente `Cadastro Usuario` transmite através da interface `IUsuario` as informações do usuário cadastrado.
+
+O componente `Login` recebe através da interface `IUsuario` os dados paraautenticar se um usuário é válido e disponibiliza através da interface`IUsuario` a permissão de acesso.
+
+O componente `PerfilAcesso` recebe através da interface `IUsuario` osdados para determinar o nível de acesso com base na configuração do perfildo usuário previamente cadastrado e fornece a interface `IPerfilAcesso`,direcionando o usuário.
+O componente `Cadastro Produto` recebe através da interface`IPerfilAcesso` para determinar com base no perfil de acesso do usuáriologado se ele pode ou não cadastrar um novo produto. Se afirmativo,fornece a interface `IProduto` com base nos dados fornecidos pelo usuáriologado e persiste no banco de dados.
+
+O Componente `Dashboard Administrador` recebe através da interface`IPerfilAcesso` os dados para determinar com base no perfil de acesso dousuário logado, caso seja o perfil ADM a interface `IRelatorio` éfornecida com base nas visualizações destinadas ao seu perfil de acesso.
+
+O Componente `Dashboard Cliente` recebe através da interface `IPerfilAcesso` para determinar com base no perfil de acesso do usuário logado, caso seja o perim CLI a interface `IRelatorio` é fornecida com base nas visualizações destinadas ao seu perfil de acesso.
+
+O Componente `Dashboard Lojista` recebe através da interface `IPerfilAcesso` para determinar com base no perfil de acesso do usuário logado, caso seja o perim LOJ a interface `IRelatorio` é fornecida com base nas visualizações destinadas ao seu perfil de acesso.
+
+O componente `Filtro Produto` recebe através da interface `IPerfilAcesso` para determinar com base no perfil de acesso do usuário logado o tipo de filtro que pode ser realizado e fornece a interface `Item[]`.
+
+O componente `Leilão Invertido` recebe através da interface “`IPerfilAcesso`”, um conjunto de dados do usuário.
+- Ao receber o conjunto de dados do usuário, o componente irá transmitirpara o barramento as mensagens de tópico “`leilao/produto/filtro`”, com osdados para a busca do produto solicitado pelo usuário.
+
+O componente `Lojistas` irá buscar o conjunto de dados através dasmensagens de tópico “`leilao/produto/filtro`”.
+- Ao receber o conjunto de dados para a busca do produto solicitado pelousuário, o componente irá desenvolver uma lista de fornecedores, a qualserá enviada para o barramento através de mensagens do tópico “`leilaoprodutos`”.
+
+O componente `Rankeamento` irá buscar o conjunto de dados através dasmensagens de tópico “`leilao/produto`”.
+- Ao receber o conjunto de dados referente a lista de fornecedores, ocomponente irá transmitir uma lista com os produtos rankeados através dainterface `Produto[]`.
+
+O componente `Checkout` recebe através interface `Item[]`, que representa a lista de produtos, e com base em validações e conversões internas o componente gera o pedido fornecendo a interface `IPedido`.
+	
+O componente `Acompanhamento` recebe através da interface `IPedido` paravalidação do endereço de entrega através do CEP, recebe também a interface`IChat` para possibilitar ao usuário logado comunicação com o lojista.Possibilitando o rastreio através da interface `IRastreio`.
+
+O componente `Chat` recebe através da interface `IDataProduto` asinformações para estabelecer uma interação entre o fornecedor e o cliente.E envia através da interface “IChat”, as informações para realizar umpedido, caso o fornecedor queira realizar o pedido para o cliente.
+
+
 ## 1. Componente Cadastro Usuário (Roxo): 
 Este componente tem o intuito de verificar se o usuário possui um cadastro registrado no sistema do Marketplace. Se o usuário possuir cadastro, os dados do usuário serão encaminhados para o componente Login. Se o usuário não possuir cadastro, o componente irá encaminhá-lo para realizar um novo cadastro no sistema.
 	Para realizar um novo cadastro, deve-se, primeiramente, escolher qual será o tipo de cadastro, ou seja, se será um cadastro administrativo, de lojista ou de cliente. Em seguida, irá abrir uma interface com os campos de autenticação e verificação respectivos a escolha realizada. 
@@ -632,54 +665,56 @@ Representa a especialização do usuário no sistema, podendo representar os seg
 
 ### Detalhamento da interação de componentes
 
-O componente `Gerencia Preenchimento` recebe através da interface `Item[]`, um conjunto de produtos. 
-	- Ao receber o conjunto de produtos, dispara através da interface `IPagamento`, os dados de pagamento do usuário.
-	- Ao final do procedimento de todos os campos, o componente `Gerencia Preenchimento` envia através da interface `IPedido`, um conjunto de dados referentes ao pedido realizado.
+## VIEW CHECKOUT
 
-	O componente `Pagamento` recebe através da interface `IPagamento` um conjunto de dados referentes ao preenchimento do pagamento do usuário.
-	- Por meio da interface `IFrete`, o componente recebe os dados do frete para realizar seu cálculo.
-	- O componente assina no barramento interno mensagens de tópico “`consulta/dados/{usuario}`”, para consultar os dados do usuário.
-- As mensagens de tópico “`resposta/dados/{usuario}/{status}`”, irão retornar ao componente o status do usuário.
-- Ao receber os dados referente a escolha de um cartão para pagamento, o componente envia os dados inseridos através da interface `ICartao`, para validar o cartão.
-- Ao receber o retorno dos dados através da interface `ICartao`, é possível continuar o processo de pagamento caso o cartão esteja válido. Caso contrário é disparada uma mensagem ao usuário.
-- Ao final do processo, o componente irá transmitir os dados de validação pela interface `IPagamento`.
+O componente `Gerencia Preenchimento` recebe através da interface `Item[]`, um conjunto de produtos. <br /> 
+ * Ao receber o conjunto de produtos, dispara através da interface `IPagamento`, os dados de pagamento do usuário.
+ * Ao final do procedimento de todos os campos, o componente `Gerencia Preenchimento` envia através da interface `IPedido`, um conjunto de dados referentes ao pedido realizado.
 
-O componente `Cartao` recebe através da interface “`ICartao`” um conjunto de dados referentes aos dados do cartão inserido pelo usuário.
-- Ao receber os dados, o componente assina no barramento interno mensagens de tópico “`consulta/dados/{cartao}`”, para consultar os dados do cartão.
-- As mensagens de tópico “`resposta/dados/{cartao}/{status}`”, irão retornar ao componente a validação do cartão. 
-- Ao final do processo, o componente irá transmitir os dados de validação pela interface `ICartao`.
+O componente `Pagamento` recebe através da interface `IPagamento` um conjunto de dados referentes ao preenchimento do pagamento do usuário.<br /> 
+* Por meio da interface `IFrete`, o componente recebe os dados do frete para realizar seu cálculo.
+* O componente assina no barramento interno mensagens de tópico “`consulta/dados/{usuario}`”, para consultar os dados do usuário.
+* As mensagens de tópico “`resposta/dados/{usuario}/{status}`”, irão retornar ao componente o status do usuário.
+* Ao receber os dados referente a escolha de um cartão para pagamento, o componente envia os dados inseridos através da interface `ICartao`, para validar o cartão.
+* Ao receber o retorno dos dados através da interface `ICartao`, é possível continuar o processo de pagamento caso o cartão esteja válido. Caso contrário é disparada uma mensagem ao usuário.
+* Ao final do processo, o componente irá transmitir os dados de validação pela interface `IPagamento`.
 
-O componente `Frete` recebe através da interface `IFrete` um conjunto de dados referentes ao preenchimento do endereço do usuário.
-- Ao receber os dados referente ao campo “CEP”, o componente assina no barramento interno mensagens de tópico “`consulta/dados/{cep}`”, para consultar o CEP.
-- As mensagens de tópico “`resposta/dados/{cep}/{valor}`”, irão retornar ao componente a validação do CEP.
-- Ao final do processo, o componente irá transmitir os dados de validação pela interface `IFrete`.
+O componente `Cartao` recebe através da interface “`ICartao`” um conjunto de dados referentes aos dados do cartão inserido pelo usuário.<br />
+* Ao receber os dados, o componente assina no barramento interno mensagens de tópico “`consulta/dados/{cartao}`”, para consultar os dados do cartão.
+* As mensagens de tópico “`resposta/dados/{cartao}/{status}`”, irão retornar ao componente a validação do cartão. 
+* Ao final do processo, o componente irá transmitir os dados de validação pela interface `ICartao`.
 
-CONTROLLER CHECKOUT
+O componente `Frete` recebe através da interface `IFrete` um conjunto de dados referentes ao preenchimento do endereço do usuário.<br />
+* Ao receber os dados referente ao campo “CEP”, o componente assina no barramento interno mensagens de tópico “`consulta/dados/{cep}`”, para consultar o CEP.
+* As mensagens de tópico “`resposta/dados/{cep}/{valor}`”, irão retornar ao componente a validação do CEP.
+* Ao final do processo, o componente irá transmitir os dados de validação pela interface `IFrete`.
 
-	O componente `Gerar Pedido` recebe através da interface `IPedido`, um conjunto de dados referentes ao pedido realizado. 
-	- Ao receber o conjunto de dados referentes ao pedido realizado, o componente os transmite através da interface `IPedido` para o componente `Armazena Pedido`, para registrar o pedido no sistema.
-	- O componente envia através da interface `Item[]`, um conjunto de produtos.
+## CONTROLLER CHECKOUT
+
+O componente `Gerar Pedido` recebe através da interface `IPedido`, umconjunto de dados referentes ao pedido realizado.<br />
+* Ao receber o conjunto de dados referentes ao pedido realizado, ocomponente os transmite através da interface `IPedido` para o componente`Armazena Pedido`, para registrar o pedido no sistema.
+* O componente envia através da interface `Item[]`, um conjunto deprodutos.
 	
-	O componente `Armazena Pedido` recebe através da interface `IPedido`, um conjunto de dados referentes ao pedido realizado.
-	- Ao receber o conjunto de dados, ele irá transmiti-los através da interface `IPedido`, para registro do pedido no sistema.
+O componente `Armazena Pedido` recebe através da interface `IPedido`, umconjunto de dados referentes ao pedido realizado.<br />
+* Ao receber o conjunto de dados, ele irá transmiti-los através dainterface `IPedido`, para registro do pedido no sistema.
 
-	O componente `Valida Cartao` recebe através da interface `ICartao`, um conjunto de dados referente ao cartão.
-	- Ao receber os dados, o componente irá buscar no barramento interno as mensagens de tópico “`consulta/dados/{cartao}`”, para verificar os dados do cartão.
-	- Após a verificação, o componente irá enviar ao barramento interno as mensagens de tópicos “`resposta/dados/{cartao}/{status}`”, com os resultados.
+O componente `Valida Cartao` recebe através da interface `ICartao`, umconjunto de dados referente ao cartão.<br />
+* Ao receber os dados, o componente irá buscar no barramento interno asmensagens de tópico “`consulta/dados/{cartao}`”, para verificar os dadosdo cartão.
+* Após a verificação, o componente irá enviar ao barramento interno asmensagens de tópicos “`resposta/dados/{cartao}/{status}`”, com osresultados.
 
-O componente `Valida Usuario` recebe através da interface `IUsuario`, um conjunto de dados referente ao usuário.
-	- Ao receber os dados, o componente irá buscar no barramento interno as mensagens de tópico “`consulta/dados/{usuario}`”, para verificar os dados do usuário.
-	- Após a verificação, o componente irá enviar ao barramento interno as mensagens de tópicos “`resposta/dados/{cartao}/{status}`”, com os resultados.
+O componente `Valida Usuario` recebe através da interface `IUsuario`, um conjunto de dados referente ao usuário.<br />
+* Ao receber os dados, o componente irá buscar no barramento interno asmensagens de tópico “`consulta/dados/{usuario}`”, para verificar os dadosdo usuário.
+* Após a verificação, o componente irá enviar ao barramento interno asmensagens de tópicos “`resposta/dados/{cartao}/{status}`”, com osresultados.
 
-	O componente `Valida CEP` recebe através da interface `IFrete`, um conjunto de dados referente ao CEP.
-	- Ao receber os dados, o componente irá buscar no barramento interno as mensagens de tópico “`consulta/dados/{cep}`”, para verificar os dados do usuário.
-	- Após a verificação, o componente irá enviar ao barramento interno as mensagens de tópicos “`resposta/dados/{cep}/{valor}`”, com os resultados.
+O componente `Valida CEP` recebe através da interface `IFrete`, umconjunto de dados referente ao CEP.<br />
+* Ao receber os dados, o componente irá buscar no barramento interno asmensagens de tópico “`consulta/dados/{cep}`”, para verificar os dados dousuário.
+* Após a verificação, o componente irá enviar ao barramento interno asmensagens de tópicos “`resposta/dados/{cep}/{valor}`”, com os resultados.
 
 
-MODEL CHECKOUT :
+## MODEL CHECKOUT :
 
-	O componente `PedidoDAO` recebe através da interface “`IPedido`”, um conjunto de dados referentes ao pedido realizado.
-	- Ao receber o conjunto de dados referentes ao pedido, ele irá armazenar estes dados no sistema para consultas futuras do pedido.
+O componente `PedidoDAO` recebe através da interface “`IPedido`”, umconjunto de dados referentes ao pedido realizado.<br />
+* Ao receber o conjunto de dados referentes ao pedido, ele irá armazenarestes dados no sistema para consultas futuras do pedido.
 
 
 ## Componente `Cartao`
