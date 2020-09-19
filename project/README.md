@@ -930,3 +930,14 @@ Tendo isto em mente, para realizar a troca de interface com o objetivo de evolu�
 O restante do processo de validação é todo realizado através de comunicações via JSON:
 
 ![Diagrama Fluxo](images/multiplas.png)
+
+# Resources Extras
+
+
+[Diagrama Detalhado](resources/diagrama_detalhado.pptx)
+
+[Diagrama Nível 1](resources/diagrama_nivel_1.pptx)
+
+[Diagrama de Sub Componentes](resources/laboratorio_sub_componentes.pptx)
+
+
