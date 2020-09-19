@@ -15,8 +15,6 @@
 
 ![Diagrama no nível 1](images/Nivel_1_Diagrama_Detalhado.png)
 
-![Diagrama no nível 1](images/Diagrama_de_Componentes_Nivel_1.png)
-
 ## 1. Componente Cadastro Usuário (Roxo): 
 Este componente tem o intuito de verificar se o usuário possui um cadastro registrado no sistema do Marketplace. Se o usuário possuir cadastro, os dados do usuário serão encaminhados para o componente Login. Se o usuário não possuir cadastro, o componente irá encaminhá-lo para realizar um novo cadastro no sistema.
 	Para realizar um novo cadastro, deve-se, primeiramente, escolher qual será o tipo de cadastro, ou seja, se será um cadastro administrativo, de lojista ou de cliente. Em seguida, irá abrir uma interface com os campos de autenticação e verificação respectivos a escolha realizada. 
@@ -91,7 +89,7 @@ Levando em consideração o procedimento de leilão invertido, o componente irá
 Em resumo, o ranqueamento irá classificar os produtos do menor ao maior preço, ao mesmo tempo que ele também irá considerar os históricos dos fornecedores, assim como os dados de pagamento e frete do cliente. 
 Com isso, este componente possibilita um processo de compra mais eficiente, pois evita o cliente de precisar buscar tão a fundo o produto desejado, o que poderia ocasionar na perda de interesse do produto ou da plataforma. Além de também disponibilizar os produtos mais adequados de acordo com o perfil de cada usuário.
 
-
+![Diagrama no nível 1](images/Diagrama_de_Componentes_Nivel_1.png)
 
 # Componente de Checkout
 
@@ -634,61 +632,287 @@ Representa a especialização do usuário no sistema, podendo representar os seg
 
 ### Detalhamento da interação de componentes
 
-O detalhamento deve seguir um formato de acordo com o exemplo a seguir:
+O componente `Gerencia Preenchimento` recebe através da interface `Item[]`, um conjunto de produtos. 
+	- Ao receber o conjunto de produtos, dispara através da interface `IPagamento`, os dados de pagamento do usuário.
+	- Ao final do procedimento de todos os campos, o componente `Gerencia Preenchimento` envia através da interface `IPedido`, um conjunto de dados referentes ao pedido realizado.
 
-* O componente `Entrega Pedido Compra` assina no barramento mensagens de tópico "`pedido/+/entrega`" através da interface `Solicita Entrega`.
-  * Ao receber uma mensagem de tópico "`pedido/+/entrega`", dispara o início da entrega de um conjunto de produtos.
-* Os componentes `Solicita Estoque` e `Solicita Compra` se comunicam com componentes externos pelo barramento:
-  * Para consultar o estoque, o componente `Solicita Estoque` publica no barramento uma mensagem de tópico "`produto/<id>/estoque/consulta`" através da interface `Consulta Estoque` e assina mensagens de tópico "`produto/<id>/estoque/status`" através da interface `Posição Estoque` que retorna a disponibilidade do produto.
+	O componente `Pagamento` recebe através da interface `IPagamento` um conjunto de dados referentes ao preenchimento do pagamento do usuário.
+	- Por meio da interface `IFrete`, o componente recebe os dados do frete para realizar seu cálculo.
+	- O componente assina no barramento interno mensagens de tópico “`consulta/dados/{usuario}`”, para consultar os dados do usuário.
+- As mensagens de tópico “`resposta/dados/{usuario}/{status}`”, irão retornar ao componente o status do usuário.
+- Ao receber os dados referente a escolha de um cartão para pagamento, o componente envia os dados inseridos através da interface `ICartao`, para validar o cartão.
+- Ao receber o retorno dos dados através da interface `ICartao`, é possível continuar o processo de pagamento caso o cartão esteja válido. Caso contrário é disparada uma mensagem ao usuário.
+- Ao final do processo, o componente irá transmitir os dados de validação pela interface `IPagamento`.
 
-Para cada componente será apresentado um documento conforme o modelo a seguir:
+O componente `Cartao` recebe através da interface “`ICartao`” um conjunto de dados referentes aos dados do cartão inserido pelo usuário.
+- Ao receber os dados, o componente assina no barramento interno mensagens de tópico “`consulta/dados/{cartao}`”, para consultar os dados do cartão.
+- As mensagens de tópico “`resposta/dados/{cartao}/{status}`”, irão retornar ao componente a validação do cartão. 
+- Ao final do processo, o componente irá transmitir os dados de validação pela interface `ICartao`.
 
-## Componente `<Nome do Componente>`
+O componente `Frete` recebe através da interface `IFrete` um conjunto de dados referentes ao preenchimento do endereço do usuário.
+- Ao receber os dados referente ao campo “CEP”, o componente assina no barramento interno mensagens de tópico “`consulta/dados/{cep}`”, para consultar o CEP.
+- As mensagens de tópico “`resposta/dados/{cep}/{valor}`”, irão retornar ao componente a validação do CEP.
+- Ao final do processo, o componente irá transmitir os dados de validação pela interface `IFrete`.
 
-> <Resumo do papel do componente e serviços que ele oferece.>
+CONTROLLER CHECKOUT
 
-![Componente](images/diagrama-componente.png)
+	O componente `Gerar Pedido` recebe através da interface `IPedido`, um conjunto de dados referentes ao pedido realizado. 
+	- Ao receber o conjunto de dados referentes ao pedido realizado, o componente os transmite através da interface `IPedido` para o componente `Armazena Pedido`, para registrar o pedido no sistema.
+	- O componente envia através da interface `Item[]`, um conjunto de produtos.
+	
+	O componente `Armazena Pedido` recebe através da interface `IPedido`, um conjunto de dados referentes ao pedido realizado.
+	- Ao receber o conjunto de dados, ele irá transmiti-los através da interface `IPedido`, para registro do pedido no sistema.
+
+	O componente `Valida Cartao` recebe através da interface `ICartao`, um conjunto de dados referente ao cartão.
+	- Ao receber os dados, o componente irá buscar no barramento interno as mensagens de tópico “`consulta/dados/{cartao}`”, para verificar os dados do cartão.
+	- Após a verificação, o componente irá enviar ao barramento interno as mensagens de tópicos “`resposta/dados/{cartao}/{status}`”, com os resultados.
+
+O componente `Valida Usuario` recebe através da interface `IUsuario`, um conjunto de dados referente ao usuário.
+	- Ao receber os dados, o componente irá buscar no barramento interno as mensagens de tópico “`consulta/dados/{usuario}`”, para verificar os dados do usuário.
+	- Após a verificação, o componente irá enviar ao barramento interno as mensagens de tópicos “`resposta/dados/{cartao}/{status}`”, com os resultados.
+
+	O componente `Valida CEP` recebe através da interface `IFrete`, um conjunto de dados referente ao CEP.
+	- Ao receber os dados, o componente irá buscar no barramento interno as mensagens de tópico “`consulta/dados/{cep}`”, para verificar os dados do usuário.
+	- Após a verificação, o componente irá enviar ao barramento interno as mensagens de tópicos “`resposta/dados/{cep}/{valor}`”, com os resultados.
+
+
+MODEL CHECKOUT :
+
+	O componente `PedidoDAO` recebe através da interface “`IPedido`”, um conjunto de dados referentes ao pedido realizado.
+	- Ao receber o conjunto de dados referentes ao pedido, ele irá armazenar estes dados no sistema para consultas futuras do pedido.
+
+
+## Componente `Cartao`
+
+> O componente Cartao oferece uma interface de verificação de dados da bandeira de um determinado cartão. Ele faz parte do pagamento e pode ou não ser utilizado durante o processo.
 
 **Interfaces**
-> * Listagem das interfaces do componente.
+> * ICartao.
 
 As interfaces listadas são detalhadas a seguir:
 
 ## Detalhamento das Interfaces
 
-### Interface `<nome da interface>`
+### Interface `ICartao`
 
-> ![Diagrama da Interface](images/diagrama-interface-itableproducer.png)
+> ![Componente](images/diagramas/ICartao.png)
 
-> <Resumo do papel da interface.>
-
-Método | Objetivo
--------| --------
-`<id do método>` | `<objetivo do método e descrição dos parâmetros>`
-
-## Exemplos:
-
-### Interface `ITableProducer`
-
-![Diagrama da Interface](images/diagrama-interface-itableproducer.png)
-
-Interface provida por qualquer fonte de dados que os forneça na forma de uma tabela.
+> Esta interface é utilizada basicamente para agrupar os dados fornecidos pelo usuário.
 
 Método | Objetivo
 -------| --------
-`requestAttributes` | Retorna um vetor com o nome de todos os atributos (colunas) da tabela.
-`requestInstances` | Retorna uma matriz em que cada linha representa uma instância e cada coluna o valor do respectivo atributo (a ordem dos atributos é a mesma daquela fornecida por `requestAttributes`.
+`getNomeBandeira()` | `Recupera o nome da bandeira do cartão utilizado`
+`getNumeroCartao()` | `Recupera o número do cartão inserido pelo usuário`
+`getNomeUsuario()` | `Recupera o nome preenchido na interface gráfica`
+`getDataValidade()` | `Recupera a data de validade do cartão utilizado`
 
-### Interface `IDataSetProperties`
+## Componente `Pagamento`
 
-![Diagrama da Interface](images/diagrama-interface-idatasetproperties.png)
+> O componente Pagamento oferece serviços voltados ao uso de boletos ou cartões dentro do sistema. Internamente possui o papel de transitar os dados de usuário com o objetivo de validar os mesmos. Por default, a compra pode ser feita por boleto (lógica interna) entretanto existe uma comunicação com o componente de Cartao no caso do usuário escolher a opção de pagamento por cartão. Para computar o valor total do serviço, o componente requer os dados de Frete, que contém o valor do mesmo.
 
-Define o recurso (usualmente o caminho para um arquivo em disco) que é a fonte de dados.
+
+**Interfaces**
+> * IPagamento.
+> * IFrete
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `IPagamento`
+
+> ![Componente](images/diagramas/IPagamento.png)
+
+> Utilizado para encapsular os dados referentes ao pagamento que o usuário deve realizar para prosseguir com o pedido.
 
 Método | Objetivo
 -------| --------
-`getDataSource` | Retorna o caminho da fonte de dados.
-`setDataSource` | Define o caminho da fonte de dados, informado através do parâmetro `dataSource`.
+`getPagamentoId()` | `Utilizado para lincar o ID do pagamentono banco`
+`getProdutos()` | `Utilizado para verificar a lsita de produtos daquele pagamento`
+`getStatus()` | `Verifica o status atual de pagamento`
+
+### Interface `IFrete`
+
+> Esta interface é utilizada neste componente para que seja possível somar o valor do frete ao valor total do pagamento. Seus campos serão descritos no próximo componente.
+
+<br />
+
+## Componente `Frete`
+
+> O componente de frete tem o objetivo de fornecer ao usuário a transparência de se obter um cálculo do valor de transporte para seus produtos. Para seu funcionamento é necessário apenas o CEP do endereço.
+
+
+**Interfaces**
+> * IFrete
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `IFrete`
+
+> ![Componente](images/diagramas/IFrete.png)
+
+> Esta interface é utilizada para transitar os dados do preço sugerido para transportar o produto até o seu destino.
+
+Método | Objetivo
+-------| --------
+`getCEP()` | `Recupera o CEP da região escolhida`
+`getValor()` | `Recupera o valor total do transporte`
+`setValor()` | `Insere o valor do frete`
+
+## Componente `Gerencia Preenchimento`
+
+> Este componente é responsável por iniciar o fluxo de pagamento através da interface gráfica disponibilizada para o usuário. Aqui o usuário poderá preencher os formulários referentes ao seu requerimento de criação de um novo pedido.
+
+
+**Interfaces**
+> * IPagamento
+> * IPedido
+> * Item[]
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `Item[]`
+
+> ![Componente](images/diagramas/item.png)
+
+> Esta interface é utilizada para armazenar os itens que o usuário pretende adicionar em seu pedido.
+
+Método | Objetivo
+-------| --------
+`getCodigo()` | `Recupera o código do produto selecionado`
+`getPreco()` | `Recupera o valor do produto`
+`getFabricante()` | `Recupera o fabricante original do produto`
+`getLojista()` | `Campo para informar o fornecedor do produto`
+
+### Interface `IPagamento`
+> A interface de pagamento é requerida neste componente durante o processo de criação do formulário que o usuário deve preencher para realizar seu pedido.
+
+### Interface IPedido
+> Esta interface (Já descrita) simboliza o pedido completo para que seja possível mostrar ao usuário.
+
+## Componente `Armazena Pedido`
+
+> O componente Armazena Pedido oferece uma interface de pedido para persistência em banco de dados e ṕosterior consulta do histórico de vendas. Ele se comunica com o componente PedidoDAO representado na camada Model do modelo MVC.
+
+**Interfaces**
+> * IPedido
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `IPedido`
+
+> ![Componente](images/diagramas/IPedido.png)
+
+> Utilizado para agrupar os dados relacionados ao pedido fornecidos pelo usuário.
+
+Método | Objetivo
+-------| --------
+`validaPedido(IPedido)` | `Valida todos os atributos de IPedido seguindo as regras definidas pela área de negócio`
+`convertePedido(IPedido)` | `Aplica o padrão Objeto de Transferência de Dados (DTO) para converter o IPedido da camada de Controller para a camada Model`
+`gravaPedido(IPedido)` | `Envia o IPedido para a camada Model persistir no banco de dados`
+
+## Componente `PedidoDAO`
+
+> O componente de PedidoDAO tem o objetivo de receber o pedido da camada Controller para persistência no banco de dados. Para seu funcionamento é necessário que o objeto pedido seja fornecido com as devidas validações dos atributos e conversão paro o modelo de dados da camada Model.
+
+**Interfaces**
+> * IPedido
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `IPedido`
+
+> Na camada Model essa interface é utilizada para transitar os dados de pedido entre a camada Controller e a camada Model, nesta etapa os dados do objeto foram transformados pelos métodos validaPedido e convertePedido, responsáveis por garantir que a informação enviada do Controller esteja fiel ao modelo esperado na camada Model.
+
+Método | Objetivo
+-------| --------
+`validaPedido(IPedido)` | `Valida todos os atributos de IPedido seguindo as regras definidas pela área de negócio`
+`convertePedido(IPedido)` | `Aplica o padrão Objeto de Transferência de Dados (DTO) para converter o IPedido da camada de Controller para a camada Model`
+`gravaPedido(IPedido)` | `Envia o IPedido para a camada Model persistir no banco de dados`
+
+## Componente `Valida Cartao`
+
+> O componente Valida Cartao oferece uma interface de cartão com as devidas validações aplicadas com o objetivo de assegurar vendas fidedignas ao lojista, minimizando assim possíveis fraudes. Para seu funcionamento é necessário o objeto cartão fornecido pelo usuário.
+
+**Interfaces**
+> * ICartao
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `ICartao`
+
+> No componente Valida Cartao a interface cartão é utilizada para transitar os dados fornecidos pelo usuário para que os mesmos sejam validados por uma Autoridade Certificadora e publica no barramento os dados do cartão validados.
+
+## Componente `Valida Usuario`
+
+> O componente Valida Usuario oferece uma interface de usuário para validação dos dados com o objetivo de assegurar vendas fidedignas ao lojista, minimizando assim possíveis fraudes. Para seu funcionamento é necessário o objeto usuário fornecido pelo cliente.
+
+**Interfaces**
+> * IUsuario
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `IUsuario`
+
+> No componente Valida Usuario a interface usuário é utilizada para transitar os dados fornecidos pelo usuário para que os mesmos sejam validados com base nas regras fornecidos pela área de negócio e publica no barramento os dados do usuário validados.
+
+## Componente `Valida CEP`
+
+> O componente Valida CEP oferece uma interface de frete para validação dos dados relacionados ao local de entrega com o objetivo de assegurar vendas fidedignas ao lojista, minimizando assim possíveis fraudes. Para seu funcionamento é necessário o CEP.
+
+**Interfaces**
+> * IFrete
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `IFrete`
+
+> No componente Valida CEP a interface frete é utilizada para transitar o CEP fornecido pelo usuário para que o mesmo seja validado e publica no barramento os endereço validado.
+
+## Componente `Gerar Pedido`
+
+> Este componente é responsável por iniciar o fluxo de geração do pedido através da lista de produtos disponibilizada pela camada View. Com base na lista de produtos o componente inicia execuções assíncronas para os componentes: Valida Usuario, Valida Cartao, Valida CEP e Armazena Pedido culminando na criação do pedido com todas as validações necessárias.
+
+**Interfaces**
+> * IPedido
+> * Item[]
+> * ICartao
+> * IUsuario
+> * IFrete
+
+As interfaces listadas são detalhadas a seguir:
+
+## Detalhamento das Interfaces
+
+### Interface `IPedido`
+
+Esta interface (Já descrita) simboliza o pedido completo para que seja possível mostrar ao usuário.
+
+### Interface `Item[]` 
+Esta interface é utilizada para armazenar os itens que o usuário pretende adicionar em seu pedido.
+
+### Interface `ICartao` 
+Esta interface (Já descrita) simboliza os dados do cartão validados por uma Autoridade Certificadora.
+
+### Interface `IUsuario`  
+Esta interface (Já descrita) simboliza os dados do usuário validados com base nas regras definidas pela área de negócio.
+
+### Interface `IFrete` 
+Esta interface (Já descrita) simboliza o endereço validado através do CEP.
 
 # Multiplas Interfaces
 
