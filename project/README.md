@@ -47,6 +47,7 @@ O componente `Acompanhamento` recebe através da interface `IPedido` paravalida�
 
 O componente `Chat` recebe através da interface `IDataProduto` asinformações para estabelecer uma interação entre o fornecedor e o cliente.E envia através da interface “IChat”, as informações para realizar umpedido, caso o fornecedor queira realizar o pedido para o cliente.
 
+# Descrição dos Componentes:
 
 ## 1. Componente Cadastro Usuário (Roxo): 
 Este componente tem o intuito de verificar se o usuário possui um cadastro registrado no sistema do Marketplace. Se o usuário possuir cadastro, os dados do usuário serão encaminhados para o componente Login. Se o usuário não possuir cadastro, o componente irá encaminhá-lo para realizar um novo cadastro no sistema.
@@ -122,6 +123,7 @@ Levando em consideração o procedimento de leilão invertido, o componente irá
 Em resumo, o ranqueamento irá classificar os produtos do menor ao maior preço, ao mesmo tempo que ele também irá considerar os históricos dos fornecedores, assim como os dados de pagamento e frete do cliente. 
 Com isso, este componente possibilita um processo de compra mais eficiente, pois evita o cliente de precisar buscar tão a fundo o produto desejado, o que poderia ocasionar na perda de interesse do produto ou da plataforma. Além de também disponibilizar os produtos mais adequados de acordo com o perfil de cada usuário.
 
+
 ![Diagrama no nível 1](images/Diagrama_de_Componentes_Nivel_1.png)
 
 # Componente de Checkout
@@ -133,6 +135,7 @@ Este componente tem a função de concentrar a lógica do processo de fechamento
 ## Interfaces de Checkout
 
 ### IPedido
+
 Interface que representa o pedido efetuado no checkout, ela contém todas as informações do pedido, incluindo informações de frete.
 
 |Atributo|Descrição|
@@ -158,6 +161,7 @@ Interface que representa o pedido efetuado no checkout, ela contém todas as inf
 |taxaTotal|Total de taxas aplicadas ao pedido|
 
 #### Json Exemplo
+
 ```json
 {
 "codPedido": "b1946ac92492d2347c6235b4d2611184",
@@ -199,7 +203,9 @@ Interface que representa o pedido efetuado no checkout, ela contém todas as inf
 ```
 
 ### IItem
+
 Interface para os objetos que compõem os itens do pedido
+
 |Atributo|Descrição|
 |:-:|:-|
 |codItem|Identificador único do item|
@@ -236,7 +242,9 @@ Interface para os objetos que compõem os itens do pedido
 ```
 
 ### IValePresente
+
 Dados de um vale presente que pode ser aplicado ao pedido.
+
 |Atributo|Descrição|
 |:-:|:-|
 |codValePresente|Identificador do vale presente|
@@ -255,6 +263,7 @@ Dados de um vale presente que pode ser aplicado ao pedido.
 ```
 
 ### IDesconto
+
 Interface que define as informações de um desconto aplicado ao item.  
 
 |Atributo|Descrição|
@@ -282,6 +291,7 @@ Interface que define as informações de um desconto aplicado ao item.
 ```
 
 ### IEndereco
+
 Esta interface representa um endereço, que pode ser usado em cobrança ou entrega.
 
 |Atributo|Descrição|
@@ -312,6 +322,7 @@ Esta interface representa um endereço, que pode ser usado em cobrança ou entre
 ```
 
 ### IFreteCalc
+
 Interface que contém as informações de frete calculado para o item.
 
 |Atributo|Descrição|
@@ -337,6 +348,7 @@ Este componente funciona de forma síncrona e é responsável por fornecer dados
 ## Interfaces de Acompanhamento
 
 ## IRastreio
+
 Única interface requerida deste componente, é utilizada para que o componente de Acompanhamento inicie suas atividades, os dados contidos por esta interface são transportados no formato JSON, abaixo é possível ver os campos e suas respectivas descrições.
 
 |Atributo|Descrição|
@@ -364,12 +376,14 @@ Este componente funciona de forma síncrona e é responsável por fornecer dados
 ```
 
 # Componente de Chat
+
 ![Componente](images/image13.png)<br />
 Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de comunicação entre o consumidor e o fornecedor, como interface requerida necessita de um 
 
 ## Interfaces de Chat
 
 ### IDataProduto
+
 Interface polimórfica que pode ser referente há um pedido, rastreio ou produto, como interface provida é o IChat responsável pelo tráfego das mensagens, o formato da mensagem obedece à seguinte estrutura:
 
 |Atributo|Descrição|
@@ -393,11 +407,13 @@ Interface polimórfica que pode ser referente há um pedido, rastreio ou produto
 
 # Componente Cadastro de Produto
 ![Componente](images/image12.png)<br />
+
 Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de cadastro de produto por fornecedores, como interfaces tanto requerida quanto provida necessita de um IProduto.
 
 ## Interfaces de Cadastro de Produto
 
 ### IProduto
+
 Interface responsável por receber e emitir mensagens referente a características do produto.
 
 |Atributo|Descrição|
@@ -426,13 +442,16 @@ Interface responsável por receber e emitir mensagens referente a característic
 Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de filtragem de lista produtos disponíveis, como interfaces requerida IFiltroProduto responsável por fornecer os parâmetros necessários para o filtro provendo a interface Produto[] responsável por fornecer uma lista de produtos.
 
 # Componente Leilão
+
 Este componente funciona de maneira assíncrona ao restante do sistema. Como interface requerida, o mesmo necessita apenas de um IFiltroProduto e, ao final de seu processamento, provê uma interface do tipo Produto[]. Ele é utilizado constantemente durante a utilização da feature de busca de produtos realizada pelo usuário. 
 Para atingir o funcionamento previsto, foi necessário realizar uma pequena composição de outros 3 componentes. Eles são: Leilão Invertido, Lojistas, e Rankeamento.
+
 ![Componente](images/image11.png)<br />
 
 ## Interfaces de Leilão
 
 ### IFiltroProduto
+
 Esta interface é utilizada como ponto de partida para que o componente Leilão Invertido inicie seu funcionamento. Esta é a única interface requerida do componente. Os dados contidos em IFiltroProduto são transformados em uma mensagem no formato JSON. Os dados são publicados no tópico leilao/produto/filtro.
 
 **Tópico:** leilao/produto/filtro
@@ -460,8 +479,8 @@ Este tópico é assinado pelos componentes Leilão Invertido e Lojistas.
 }
 ```
 
-
 ### IProduto
+
 Esta interface é provida pelo componente ao final de seu processamento.Ela é uma lista de produtos que foram qualificados com o objetivo de auxiliar na escolha do usuário. Para que seja possível entregar os dados, um objeto JSON contendo uma lista de produtos é convertida em Produto[]. Os dados que formam esta lista são coletados do tópico leilao/produtos.
 
 **Tópico:** leilao/produtos
@@ -497,6 +516,7 @@ Este tópico é assinado pelos componentes Rankeamento e Lojista.
 ```
 
 # Componente Dashboard
+
 Componente responsável pela construção dos dashboards. Como interface requerida, é esperado a IUsuario e como interface provida a IRelatorio, representando os dados do usuário e os dados necessários para geração do dashboard, respectivamente.
 
 ### IRelatorio
@@ -963,6 +983,7 @@ entre View e controller e nenhum acoplamento entre View e Model.
 Tendo isto em mente, para realizar a troca de interface com o objetivo de evolução e/ou portabilidade
 é necessário apenas que a camada de visualização tenha conhecimento das interfaces de Pedido e de Itens.
 O restante do processo de validação é todo realizado através de comunicações via JSON:
+
 
 ![Diagrama Fluxo](images/multiplas.png)
 
