@@ -975,4 +975,4 @@ O restante do processo de validação é todo realizado através de comunicaçõ
 
 [Diagrama de Sub Componentes](resources/laboratorio_sub_componentes.pptx)
 
-
+[Documento base para criar o readme](resources/detalhamento_componentes.pdf)
