@@ -22,7 +22,7 @@ Assim que todos os dados forem validados e registrados, uma notificação será 
 ## 2. Componente Login (Rosa):
 	Os dados do usuário armazenados no sistema serão enviados a este componente para que quando ele inserir seu login (e-mail)  e sua senha, o sistema do marketplace possa confirmar se os códigos de acesso estão corretos, e assim permitir a entrada no sistema. 
 Entretanto, caso os dados estejam incorretos, o usuário será notificado que há incompatibilidade entre o código de acesso inserido com o registrado, e pode vir a realizar outras tentativas ou recuperar o acesso através do registro de uma nova senha.
-Para recuperar o acesso, o usuário irá ser direcionado a outra interface e nela inserir o e-mail cadastrado no campo solicitado. Caso este e-mail não esteja cadastrado no sistema, uma notificação irá ser apresentada ao usuário. Caso contrário, um link do sistema será enviado ao e-mail com o assunto “recuperação de acesso”. O usuário pode inserir a última senha de que se recorde, ou responder a pergunta-chave. Em ambas as opções, se o campo for preenchido corretamente, o sistema do marketplace irá permitir o registro de uma nova senha, a qual será utilizada posteriormente para realizar um novo login.
+Para recuperar o acesso, o usuário irá ser direcionado a outra interface e nela inserir o e-mail cadastrado no campo solicitado. Caso este e-mail não esteja cadastrado no sistema, uma notificação irá ser apresentada ao usuário. Caso contrário, um link do sistema será enviado ao e-mail com o assunto "recuperação de acesso". O usuário pode inserir a última senha de que se recorde, ou responder a pergunta-chave. Em ambas as opções, se o campo for preenchido corretamente, o sistema do marketplace irá permitir o registro de uma nova senha, a qual será utilizada posteriormente para realizar um novo login.
 
 ## 3. Componente Perfil Acesso (Verde):
 	Após a confirmação de permissão do sistema, este componente irá redirecionar o usuário de acordo com seu perfil, ou seja, se o usuário for administrador, ele irá ser direcionado para a interface de visualização administrativa do sistema, o mesmo ocorre para os perfis de lojista e cliente, ao serem redirecionados às interfaces de seus perfis de cadastro.
@@ -50,15 +50,15 @@ O administrador também é responsável por assegurar a confiabilidade, seguran�
 
 ## 8. Componente Filtro Produto (Verde Claro):
   Este componente permite que o usuário busque pelo produto desejado através da barra de busca da interface. O cliente pode comprar produtos como em uma loja virtual tradicional, porém podendo escolher entre diferentes lojas/fornecedores.
-	Uma listagem inicial será apresentada ao usuário através do método de “leilão invertido”, o qual irá apresentar os produtos mais recomendados ordenados pelo menor preço. O cliente poderá, posteriormente, optar por selecionar um dos produtos para averiguar melhor suas informações ou selecionar um ou mais dos outros filtros disponíveis pelo sistema.
-	Além do “leilão invertido”, o sistema toma como base os históricos do cliente e dos fornecedores do produto solicitado, como localidade para determinar o alcance disponível de entrega, a classificação do produto e do fornecedor, feedbacks apresentados por outros usuários que já compraram este produto, entre outros atributos. Estas informações também estarão disponíveis para que o cliente possa consultar antes de realizar a compra, com o intuito de proporcionar uma melhor experiência.
+	Uma listagem inicial será apresentada ao usuário através do método de "leilão invertido", o qual irá apresentar os produtos mais recomendados ordenados pelo menor preço. O cliente poderá, posteriormente, optar por selecionar um dos produtos para averiguar melhor suas informações ou selecionar um ou mais dos outros filtros disponíveis pelo sistema.
+	Além do "leilão invertido", o sistema toma como base os históricos do cliente e dos fornecedores do produto solicitado, como localidade para determinar o alcance disponível de entrega, a classificação do produto e do fornecedor, feedbacks apresentados por outros usuários que já compraram este produto, entre outros atributos. Estas informações também estarão disponíveis para que o cliente possa consultar antes de realizar a compra, com o intuito de proporcionar uma melhor experiência.
 	Assim que o cliente selecionar um ou mais produtos desejados para compra, eles serão armazenados no carrinho de compras, até que o usuário decida realizar e finalizar o pedido, ou excluir os produtos.
 
 ## 9. Componente Checkout (Laranja):
 Este componente irá buscar os produtos presentes no carrinho para realizar o processo de pedido de compra.
 O sistema irá buscar pela lista de produtos, e estruturar o pedido de compra, ao mesmo tempo em que verifica e captura os dados do usuário. O usuário deverá preencher e confirmar todos os campos do pedido.
 O sistema irá verificar os dados bancários e os de endereço para garantir, respectivamente, que sejam dados de uma conta bancária válida, e enviem o produto e/ou a cobrança para o endereço correto. Caso os dados estão incorretos ou inválidos, uma mensagem será exibida ao usuário para que ele confirme novamente os dados, ou insira outros.
-	Quando todos os campos estiverem preenchidos e validados, a confirmação do pedido será exibida na interface do usuário e ainda será enviada ao e-mail cadastrado. Caso o usuário tenha escolhido “boleto” como forma de pagamento, ele poderá optar por abrir o boleto na tela, enviar para o e-mail ou imprimir. O pedido só será confirmado quando o pagamento for realizado e concluído com sucesso dentro do período estimado pelo boleto ou cartão. Caso contrário, o pedido será cancelado.
+	Quando todos os campos estiverem preenchidos e validados, a confirmação do pedido será exibida na interface do usuário e ainda será enviada ao e-mail cadastrado. Caso o usuário tenha escolhido "boleto" como forma de pagamento, ele poderá optar por abrir o boleto na tela, enviar para o e-mail ou imprimir. O pedido só será confirmado quando o pagamento for realizado e concluído com sucesso dentro do período estimado pelo boleto ou cartão. Caso contrário, o pedido será cancelado.
 
 ## 10. Componente Acompanhamento (Cinza):
   Este componente é responsável pelo procedimento após a confirmação do pedido.
@@ -87,7 +87,366 @@ O sistema irá verificar os dados bancários e os de endereço para garantir, re
 
 
 
-Componente de Checkout
+# Componente de Checkout
+
+![Componente](images/image7.png)
+
+Este componente tem a função de concentrar a lógica do processo de fechamento do pedido, incluindo as sub etapas de cálculo do frete, processamento do pagamento e movimentação do pedido para entrega.
+
+## Interfaces de Checkout
+
+### IPedido
+Interface que representa o pedido efetuado no checkout, ela contém todas as informações do pedido, incluindo informações de frete.
+
+|Atributo|Descrição|
+|:-:|:-|
+|codPedido|Identificador único do pedido|
+|codDesconto|Código do cupom de de desconto aplicado|
+|descontoAplicado|Dados de desconto gerados por um código de desconto|
+|criadoEm|Data de criação do pedido|
+|atualizadoEm|Data da última atualização do pedido|
+|moeda|Moeda sobre a qual a transação será calculada|
+|idCliente|Identificador do cliente que efetuou o pedido|
+|listaItens|Lista de itens que compõe o pedido|
+|enderecoCobranca|Endereço de cobrança|
+|enderecoEntrega|Endereço de entrega|
+|linhaFrete|O serviço de frete selecionado original|
+|linhaFrete|O serviço de frete com valores originais|
+|freteReal|O serviço de frete selecionado calculado c/s desconto|
+|origem|Origem do pedido, app_mobile ou app_web|
+|subtotal|O valor total do pedido no checkout antes de calcular taxas fretes ou descontos|
+|linhaTaxa|Lista de taxas aplicadas ao pedido|
+|taxar|Indicador se as taxas serão ou não incluídas ao valor do pedido (cliente paga as taxas)|
+|valorTotal|O valor total do pedido após aplicadas taxas, custos de frete, descontos e vale presentes|
+|taxaTotal|Total de taxas aplicadas ao pedido|
+
+#### Json Exemplo
+```json
+{
+"codPedido": "b1946ac92492d2347c6235b4d2611184",
+"codDesconto": "30_DOLLARS_OFF",
+"descontoAplicado": IDesconto(),
+"criadoEm": "2008-01-10T11:00:00-05:00",
+"atualizadoEm": "2012-08-24T14:02:15-04:00",
+"moeda": "BRL",
+"idCliente": 1234,
+"gift_cards": [ IValePresente() ],
+"listaItens": [ IItem() ],
+"enderecoCobranca": IEndereco(),
+"enderecoEntrega": IEndereco(),
+"linhaFrete": IFreteCalc(),
+"freteReal": IFreteCalc(),
+"origem": "app_mobile",
+"subtotal": "398.00",
+"linhaTaxa": [ ITaxa() ],
+"taxar": false,
+"valorTotal": "409.94",
+"taxaTotal": "11.94",
+}
+```  
+
+### ITaxa  
+|Atributo|Descrição|
+|:-:|:-|
+|valor|Valor efetivo da taxa calculada|
+|porcentagem|Porcentagem da taxa|
+|titulo|Descrição da taxa|
+
+#### Json Exemplo
+```json
+{
+  "valor": "11.94",
+  "porcentagem": "0.06",
+  "titulo": "State Tax",
+}
+```
+
+### IItem
+Interface para os objetos que compõem os itens do pedido
+|Atributo|Descrição|
+|:-:|:-|
+|codItem|Identificador único do item|
+|precoOriginal|Preço original do produto caso esteja em promoção|
+|peso|Peso do produto|
+|precoLinha|Preço total calculado multiplicando o price pela quantity|
+|preco|O preço unitário base para o item|
+|codProduto|Identificador do produto para o item|
+|quantidade|Quantidade do produto adquirida|
+|sku|Código visível do produto no catálogo de produtos|
+|taxavel|Identificador se o produto deve ser taxado ou não|
+|titulo|Título do item copiado do produto|
+|codVariante|Código da variante do produto|
+|tituloVariante|Título da variante do produto|
+|fabricante|Fabricante do item|
+
+#### Json Exemplo
+```json
+{
+  "codItem": 39072856,
+  "precoOriginal": "9.99",
+  "peso": "20",
+  "precoLinha": "19.99",
+  "preco": "19.99",
+  "codProduto": 632910392,
+  "quantity": "",
+  "sku": "IPOD2008GREEN",
+  "taxavel": true,
+  "titulo": "IPod Nano - 8GB",
+  "codVariante": 39072856,
+  "tituloVariante": "Green",
+  "fabricante": "Apple"
+}
+```
+
+### IValePresente
+Dados de um vale presente que pode ser aplicado ao pedido.
+|Atributo|Descrição|
+|:-:|:-|
+|codValePresente|Identificador do vale presente|
+|quantidadeUtilizada|Valor usado do vale presente|
+|sulfixo|Últimos caracteres do vale presente para exibição|
+|balanco|Valor restante no vale presente após a transação|
+
+#### Json Exemplo
+```json
+{
+  "codValePresente": 1014759463,
+  "quantidadeUtilizada": "30.00",
+  "balanco": "70.00",
+  "sulfixo": "abdr"
+}
+```
+
+### IDesconto
+Interface que define as informações de um desconto aplicado ao item.  
+
+|Atributo|Descrição|
+|:-:|:-|
+|quantidade|Valor que será descontado do payment_due|
+|nomePessoa|Nome da pessoa relacionada ao endereço|
+|titulo|Título para categorizar o desconto|
+|description|Descrição do desconto|
+|valor|Valor usado para efetivamente calcular o desconto|
+|tipoValor|Tipo de desconto, percentage ou fixed_amount|
+|razaoRecusa|Motivo caso o desconto não possa ser aplicado|
+|aplicavel|Indicador se o desconto pode ou não ser aplicado|
+
+#### Json Exemplo
+```json
+{
+  "quantidade": "30.00",
+  "titulo": "XYZ Promotion",
+  "description": "Promotional item for blackfriday.",
+  "valor": "30.00",
+  "tipoValor": "fixed_amount",
+  "razaoRecusa": null,
+  "aplicavel": true,
+}
+```
+
+### IEndereco
+Esta interface representa um endereço, que pode ser usado em cobrança ou entrega.
+
+|Atributo|Descrição|
+|:-:|:-|
+|logradouro|A rua, logradouro, avenida, etc...|
+|cidade|Cidade|
+|company|Empresa associada a este endereço (caso aplicável)|
+|pais|País|
+|nomePessoa|Nome da pessoa relacionada ao endereço|
+|telefone|Telefone relacionado ao endereço|
+|bairro|Nome do bairro, província ou sub região|
+|cep|Código postal (CEP)|
+|codPais|Código do País|
+
+#### Json Exemplo
+```json
+{
+  "logradouro": "Chestnut Street 92",
+  "cidade": "Louisville",
+  "company": null,
+  "pais": "United States",
+  "nomePessoa": "Bob",
+  "telefone": "555-625-1199",
+  "bairro": "Kentucky",
+  "cep": "40202",
+  "codPais": "US"
+}
+```
+
+### IFreteCalc
+Interface que contém as informações de frete calculado para o item.
+
+|Atributo|Descrição|
+|:-:|:-|
+|codFrete|Identificador global do serviço de frete (transportadora)|
+|preco|Custo do frete calculado|
+|titulo|Título na tela de checkout|
+
+#### Json Exemplo
+```json
+{
+  "codFrete": "shop-Standard-10.00",
+  "preco": "10.00",
+  "titulo": "Standard",
+}
+```
+
+# Componente de Acompanhamento
+![Componente](images/image9.png)
+
+Este componente funciona de forma síncrona e é responsável por fornecer dados sobre o estado da entrega, como interface requerida necessita de um IRastreio e no final provê uma interface de IPedido. Ele é acionado após a confirmação de pagamento do pedido, provendo a possibilidade de acompanhamento do andamento da entrega. 
+
+## Interfaces de Acompanhamento
+
+## IRastreio
+Única interface requerida deste componente, é utilizada para que o componente de Acompanhamento inicie suas atividades, os dados contidos por esta interface são transportados no formato JSON, abaixo é possível ver os campos e suas respectivas descrições.
+
+|Atributo|Descrição|
+|:-:|:-|
+|codRastreio|Código de rastreio do produto, código único|
+|codPedido|Código do pedido|
+|codCliente|Código do cliente|
+|codFornecedor|Código do fornecedor|
+|localidade|Posição geográfica do pedido|
+|status|Status da entrega. Ex: Em transporte, entregue e etc|
+
+#### Json Exemplo
+```json
+{
+  "codRastreio": 123,
+  "codPedido": 456,
+  "codCliente": 654,
+  "codFornecedor": 1234,
+  "Localidade": {
+    "Lat": 23°10'45.98"S,
+    "Lon": 45°53'12.98"W 
+  },
+"status": "Entregue"
+}
+```
+
+# Componente de Chat
+![Componente](images/image13.png)
+Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de comunicação entre o consumidor e o fornecedor, como interface requerida necessita de um 
+
+## Interfaces de Chat
+
+### IDataProduto
+Interface polimórfica que pode ser referente há um pedido, rastreio ou produto, como interface provida é o IChat responsável pelo tráfego das mensagens, o formato da mensagem obedece à seguinte estrutura:
+
+|Atributo|Descrição|
+|:-:|:-|
+|resourceCode|Pode ser código do rastreio, pedido ou produto|
+|resourceType|O tipo de recurso que a mensagem se refere (rastreio, pedido ou produto)|
+|codEmissor|Código do emissor, pode ser o cliente ou fornecedor|
+|codReceptor|Código do receptor, pode ser o cliente ou fornecedor|
+|mensagem|Mensagem enviada pelo seller ou cliente|
+
+#### Json Exemplo
+```json
+{
+  "resourceCode": 123,
+  "resourceType": "Rastreio",
+  "codEmissor": 654,
+  "codReceptor": 1234,
+  "mensagem": "Gostaria de saber como anda meu pedido"
+}
+```
+
+# Componente Cadastro de Produto
+![Componente](images/image12.png)
+Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de cadastro de produto por fornecedores, como interfaces tanto requerida quanto provida necessita de um IProduto.
+
+## Interfaces de Cadastro de Produto
+
+### IProduto
+Interface responsável por receber e emitir mensagens referente a características do produto.
+
+|Atributo|Descrição|
+|:-:|:-|
+|codProduto|Código do produto |
+|nome|Nome do produto|
+|preco|Preço do produto|
+|categoria|Categoria do produto|
+|disponibilidade|Valor indicativo se o produto está disponível|
+
+#### Json Exemplo
+```json
+{
+  "codProduto": "01",
+  "nome": "Playstation 5",
+  "preco": "R$ 4.999,99",
+  "descricao": "...",
+  "categoria": ["eletronico"], 
+  "disponibilidade": false
+}
+```
+  
+# Componente Filtro de Produto
+![Componente](images/image10.png)
+
+Este componente funciona de forma síncrona e é responsável por fornecer o mecanismo de filtragem de lista produtos disponíveis, como interfaces requerida IFiltroProduto responsável por fornecer os parâmetros necessários para o filtro provendo a interface Produto[] responsável por fornecer uma lista de produtos.
+
+# Componente Leilão
+Este componente funciona de maneira assíncrona ao restante do sistema. Como interface requerida, o mesmo necessita apenas de um IFiltroProduto e, ao final de seu processamento, provê uma interface do tipo Produto[]. Ele é utilizado constantemente durante a utilização da feature de busca de produtos realizada pelo usuário. 
+Para atingir o funcionamento previsto, foi necessário realizar uma pequena composição de outros 3 componentes. Eles são: Leilão Invertido, Lojistas, e Rankeamento.
+![Componente](images/image11.png)
+
+## Interfaces de Leilão
+
+### IFiltroProduto
+Esta interface é utilizada como ponto de partida para que o componente Leilão Invertido inicie seu funcionamento. Esta é a única interface requerida do componente. Os dados contidos em IFiltroProduto são transformados em uma mensagem no formato JSON. Os dados são publicados no tópico leilao/produto/filtro.
+
+**Tópico:** leilao/produto/filtro
+Este tópico é assinado pelos componentes Leilão Invertido e Lojistas. 
+
+![Componente](images/image2.png)
+
+|Atributo|Descrição|
+|:-:|:-|
+|nomeProduto|Nome pesquisado pelo usuário|
+|formaPagamento|String representando a forma de pagamento escolhida no filtro |
+|localidade|Pacote contendo os dados de Latitude e longitude|
+|preco|Preço pesquisado pelo usuário|
+
+#### Json Exemplo
+```json
+{
+  "NomeProduto": "Playstation 5",
+  "FormaPagamento": "Cartao",
+  "Localidade": {
+    "Lat": "23°10'45.98\"S",
+    "Lon": "45°53'12.98\"W" 
+  },
+  "Preco": "R$ 5.000,00"
+}
+```
+
+
+### IProduto
+Esta interface é provida pelo componente ao final de seu processamento.Ela é uma lista de produtos que foram qualificados com o objetivo de auxiliar na escolha do usuário. Para que seja possível entregar os dados, um objeto JSON contendo uma lista de produtos é convertida em Produto[]. Os dados que formam esta lista são coletados do tópico leilao/produtos.
+
+**Tópico:** leilao/produtos
+Este tópico é assinado pelos componentes Rankeamento e Lojista.
+
+#### Json Exemplo
+```json
+{
+  "Produtos": [
+    {
+      "codProduto": "01",
+      "nome": "Playstation 5",
+      "preco": "R$ 4.999,99",
+      "descricao": "...",
+      "categoria": ["eletronico"], 
+      "disponibilidade": false
+    },
+    ...
+  ]
+}
+```
+
 
 
 
@@ -96,7 +455,7 @@ Componente de Checkout
 
 Apresente um diagrama conforme o modelo a seguir:
 
-> ![Modelo de diagrama no nível 1](images/coreografia.png)
+![Modelo de diagrama no nível 1](images/coreografia.png)
 
 ### Detalhamento da interação de componentes
 
